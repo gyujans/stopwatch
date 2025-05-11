@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flip Stopwatch - Fliqlo Style</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <!-- DS-Digital font via CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/keshikan/Digital-7@master/digital-7.css">
   <style>
     html, body {
       height: 100%;
@@ -47,12 +48,12 @@
       align-items: center;
       justify-content: center;
     }
-    .card-face {
+    .card-face, .card-flip {
       width: 100%;
       height: 50%;
       background: #111;
       color: #fff;
-      font-family: 'Share Tech Mono', monospace;
+      font-family: 'DS-Digital', 'Arial', monospace;
       font-size: 140px;
       display: flex;
       align-items: center;
@@ -68,24 +69,36 @@
       user-select: none;
       z-index: 1;
     }
-    .card-face.bottom {
+    .card-face.bottom, .card-flip.bottom {
       top: 50%;
       border-radius: 0 0 20px 20px;
       border-top: 2px solid #222;
       border-bottom: none;
     }
-    .card-face.top {
+    .card-face.top, .card-flip.top {
       top: 0;
     }
-    .flip-top-animate {
+    .card-flip {
       z-index: 2;
-      animation: flipTop 0.5s forwards;
-      transform-origin: bottom;
+      pointer-events: none;
     }
-    .flip-bottom-animate {
-      z-index: 2;
-      animation: flipBottom 0.5s forwards;
+    .card-flip.top {
+      transform-origin: bottom;
+      transform: rotateX(0deg);
+      display: none;
+    }
+    .card-flip.bottom {
       transform-origin: top;
+      transform: rotateX(90deg);
+      display: none;
+    }
+    .flip-card.flipping .card-flip.top {
+      display: flex;
+      animation: flipTop 0.5s forwards;
+    }
+    .flip-card.flipping .card-flip.bottom {
+      display: flex;
+      animation: flipBottom 0.5s forwards;
     }
     @keyframes flipTop {
       0% { transform: rotateX(0deg);}
@@ -97,7 +110,7 @@
     }
     .label {
       color: #fff8;
-      font-family: 'Share Tech Mono', monospace;
+      font-family: 'DS-Digital', 'Arial', monospace;
       font-size: 1.2rem;
       margin-top: 8px;
       letter-spacing: 0.1em;
@@ -113,7 +126,7 @@
       background: #111;
       color: #fff;
       border: none;
-      font-family: 'Share Tech Mono', monospace;
+      font-family: 'DS-Digital', 'Arial', monospace;
       font-size: 2rem;
       padding: 18px 40px;
       border-radius: 12px;
@@ -131,7 +144,7 @@
         width: 90px;
         height: 120px;
       }
-      .card-face {
+      .card-face, .card-flip {
         font-size: 60px;
       }
     }
@@ -143,7 +156,7 @@
         width: 60px;
         height: 80px;
       }
-      .card-face {
+      .card-face, .card-flip {
         font-size: 36px;
       }
       .controls button {
@@ -159,6 +172,8 @@
       <div class="flip-card">
         <div class="card-face top">00</div>
         <div class="card-face bottom">00</div>
+        <div class="card-flip top">00</div>
+        <div class="card-flip bottom">00</div>
       </div>
       <div class="label">MIN</div>
     </div>
@@ -166,6 +181,8 @@
       <div class="flip-card">
         <div class="card-face top">00</div>
         <div class="card-face bottom">00</div>
+        <div class="card-flip top">00</div>
+        <div class="card-flip bottom">00</div>
       </div>
       <div class="label">SEC</div>
     </div>
@@ -173,6 +190,8 @@
       <div class="flip-card">
         <div class="card-face top">00</div>
         <div class="card-face bottom">00</div>
+        <div class="card-flip top">00</div>
+        <div class="card-flip bottom">00</div>
       </div>
       <div class="label">CS</div>
     </div>
@@ -194,26 +213,24 @@
       const card = flipUnit.querySelector('.flip-card');
       const top = card.querySelector('.card-face.top');
       const bottom = card.querySelector('.card-face.bottom');
+      const flipTop = card.querySelector('.card-flip.top');
+      const flipBottom = card.querySelector('.card-flip.bottom');
       const currentVal = top.textContent;
 
       if (currentVal === newVal) return;
 
-      // Set up the bottom face for the flip
+      // Set up the faces for the flip
+      flipTop.textContent = currentVal;
+      flipBottom.textContent = newVal;
+      top.textContent = currentVal;
       bottom.textContent = newVal;
 
-      // Animate top face flipping up
-      top.classList.add('flip-top-animate');
-      top.addEventListener('animationend', function handler() {
-        top.textContent = newVal;
-        top.classList.remove('flip-top-animate');
-        top.removeEventListener('animationend', handler);
-      });
+      card.classList.add('flipping');
 
-      // Animate bottom face flipping down
-      bottom.classList.add('flip-bottom-animate');
-      bottom.addEventListener('animationend', function handler() {
-        bottom.classList.remove('flip-bottom-animate');
-        bottom.removeEventListener('animationend', handler);
+      flipTop.addEventListener('animationend', function handler() {
+        top.textContent = newVal;
+        card.classList.remove('flipping');
+        flipTop.removeEventListener('animationend', handler);
       });
     }
 
