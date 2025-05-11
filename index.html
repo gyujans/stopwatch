@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flip Stopwatch - Fliqlo Style</title>
-  <!-- Use a digital font similar to Fliqlo -->
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -42,7 +41,7 @@
       background: none;
       border-radius: 20px;
       box-shadow: 0 8px 32px #000a;
-      overflow: visible;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -67,6 +66,7 @@
       box-sizing: border-box;
       letter-spacing: 0.05em;
       user-select: none;
+      z-index: 1;
     }
     .card-face.bottom {
       top: 50%;
@@ -77,13 +77,15 @@
     .card-face.top {
       top: 0;
     }
-    .flip-animate-top {
+    .flip-top-animate {
+      z-index: 2;
       animation: flipTop 0.5s forwards;
-      z-index: 2;
+      transform-origin: bottom;
     }
-    .flip-animate-bottom {
-      animation: flipBottom 0.5s forwards;
+    .flip-bottom-animate {
       z-index: 2;
+      animation: flipBottom 0.5s forwards;
+      transform-origin: top;
     }
     @keyframes flipTop {
       0% { transform: rotateX(0deg);}
@@ -200,17 +202,17 @@
       bottom.textContent = newVal;
 
       // Animate top face flipping up
-      top.classList.add('flip-animate-top');
+      top.classList.add('flip-top-animate');
       top.addEventListener('animationend', function handler() {
         top.textContent = newVal;
-        top.classList.remove('flip-animate-top');
+        top.classList.remove('flip-top-animate');
         top.removeEventListener('animationend', handler);
       });
 
       // Animate bottom face flipping down
-      bottom.classList.add('flip-animate-bottom');
+      bottom.classList.add('flip-bottom-animate');
       bottom.addEventListener('animationend', function handler() {
-        bottom.classList.remove('flip-animate-bottom');
+        bottom.classList.remove('flip-bottom-animate');
         bottom.removeEventListener('animationend', handler);
       });
     }
