@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flip Clock Stopwatch</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .clock {
+      display: flex;
+      gap: 10px;
+    }
+
+    .flip-card {
+      perspective: 1000px;
+    }
+
+    .flip-inner {
+      position: relative;
+      width: 80px;
+      height: 100px;
+      background: #111;
+      color: #0f0;
+      border-radius: 10px;
+      border: 2px solid #333;
+      text-align: center;
+      line-height: 100px;
+      font-size: 50px;
+      font-weight: bold;
+      transition: transform 0.5s ease-in-out;
+      transform-style: preserve-3d;
+    }
+
+    .flip-inner.flip {
+      animation: flip 0.5s ease-in-out;
+    }
+
+    @keyframes flip {
+      0% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-90deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .controls {
+      margin-top: 30px;
+    }
+
+    .controls button {
+      background-color: #222;
+      border: 1px solid #444;
+      color: #0f0;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .controls button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="clock">
+    <div class="flip-card"><div class="flip-inner" id="hours">00</div></div>
+    <div class="flip-card"><div class="flip-inner" id="minutes">00</div></div>
+    <div class="flip-card"><div class="flip-inner" id="seconds">00</div></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="start()">Start</button>
+    <button onclick="stop()">Stop</button>
+    <button onclick="reset()">Reset</button>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsed = 0;
+    let timerInterval = null;
+
+    function animateFlip(id, newValue) {
+      const el = document.getElementById(id);
+      if (el.textContent !== newValue) {
+        el.classList.remove('flip');
+        void el.offsetWidth; // Trigger reflow
+        el.textContent = newValue;
+        el.classList.add('flip');
+      }
+    }
+
+    function updateDisplay() {
+      const totalSeconds = Math.floor((Date.now() - startTime + elapsed) / 1000);
+      const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(totalSeconds % 60).padStart(2, '0');
+
+      animateFlip('hours', hrs);
+      animateFlip('minutes', mins);
+      animateFlip('seconds', secs);
+    }
+
+    function start() {
+      if (timerInterval) return;
+      startTime = Date.now();
+      timerInterval = setInterval(updateDisplay, 1000);
+    }
+
+    function stop() {
+      if (!timerInterval) return;
+      clearInterval(timerInterval);
+      elapsed += Date.now() - startTime;
+      timerInterval = null;
+    }
+
+    function reset() {
+      stop();
+      elapsed = 0;
+      updateDisplay();
+    }
+
+    updateDisplay(); // Initialize display
+  </script>
+</body>
+</html>
