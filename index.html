@@ -38,74 +38,47 @@
       width: 100%;
       height: 100%;
       position: relative;
-      background: none;
+      background: #111;
       border-radius: 20px;
       box-shadow: 0 8px 32px #000a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
     }
-    .card-face, .card-flip {
-      width: 100%;
-      height: 50%;
-      background: #111;
-      color: #fff;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .flip-divider {
       position: absolute;
       left: 0;
-      backface-visibility: hidden;
-      user-select: none;
-      letter-spacing: 0.05em;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-    .card-face.top, .card-flip.top {
-      top: 0;
-      border-radius: 20px 20px 0 0;
-      border-bottom: 2px solid #222;
-    }
-    .card-face.bottom, .card-flip.bottom {
+      width: 100%;
+      height: 2px;
+      background: #222;
       top: 50%;
-      border-radius: 0 0 20px 20px;
-      border-top: 2px solid #222;
-    }
-    .card-flip {
+      transform: translateY(-1px);
       z-index: 2;
       pointer-events: none;
-      visibility: hidden;
     }
-    .card-flip.top {
-      transform-origin: bottom;
-      transform: rotateX(0deg);
+    .flip-number {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 140px;
+      color: #fff;
+      letter-spacing: 0.05em;
+      z-index: 1;
+      user-select: none;
+      width: 100%;
+      text-align: center;
+      transition: none;
+      will-change: transform;
+      backface-visibility: hidden;
+      /* For animation */
+      position: relative;
     }
-    .card-flip.bottom {
-      transform-origin: top;
-      transform: rotateX(90deg);
+    .flip-card.flipping .flip-number {
+      animation: flipAnim 0.6s cubic-bezier(.4,2,.6,.9);
     }
-    .flip-card.flipping .card-face.top,
-    .flip-card.flipping .card-face.bottom {
-      visibility: hidden;
-    }
-    .flip-card.flipping .card-flip.top {
-      visibility: visible;
-      animation: flipTop 0.5s forwards;
-    }
-    .flip-card.flipping .card-flip.bottom {
-      visibility: visible;
-      animation: flipBottom 0.5s forwards;
-    }
-    @keyframes flipTop {
+    @keyframes flipAnim {
       0% { transform: rotateX(0deg);}
-      100% { transform: rotateX(-90deg);}
-    }
-    @keyframes flipBottom {
-      0% { transform: rotateX(90deg);}
+      49% { transform: rotateX(-89deg);}
+      50% { transform: rotateX(90deg);}
       100% { transform: rotateX(0deg);}
     }
     .label {
@@ -144,7 +117,7 @@
         width: 90px;
         height: 120px;
       }
-      .card-face, .card-flip {
+      .flip-number {
         font-size: 60px;
       }
     }
@@ -156,7 +129,7 @@
         width: 60px;
         height: 80px;
       }
-      .card-face, .card-flip {
+      .flip-number {
         font-size: 36px;
       }
       .controls button {
@@ -170,28 +143,22 @@
   <div class="flip-clock">
     <div class="flip-unit" id="hours">
       <div class="flip-card">
-        <div class="card-face top">00</div>
-        <div class="card-face bottom">00</div>
-        <div class="card-flip top">00</div>
-        <div class="card-flip bottom">00</div>
+        <span class="flip-number">00</span>
+        <div class="flip-divider"></div>
       </div>
       <div class="label">HOUR</div>
     </div>
     <div class="flip-unit" id="minutes">
       <div class="flip-card">
-        <div class="card-face top">00</div>
-        <div class="card-face bottom">00</div>
-        <div class="card-flip top">00</div>
-        <div class="card-flip bottom">00</div>
+        <span class="flip-number">00</span>
+        <div class="flip-divider"></div>
       </div>
       <div class="label">MIN</div>
     </div>
     <div class="flip-unit" id="seconds">
       <div class="flip-card">
-        <div class="card-face top">00</div>
-        <div class="card-face bottom">00</div>
-        <div class="card-flip top">00</div>
-        <div class="card-flip bottom">00</div>
+        <span class="flip-number">00</span>
+        <div class="flip-divider"></div>
       </div>
       <div class="label">SEC</div>
     </div>
@@ -208,35 +175,24 @@
       return s.substr(s.length - size);
     }
 
-    // Flip animation logic with no stacking/doubling
+    // Flip animation logic: animate the whole number, not halves
     function flipTo(flipUnit, newVal) {
       const card = flipUnit.querySelector('.flip-card');
-      const top = card.querySelector('.card-face.top');
-      const bottom = card.querySelector('.card-face.bottom');
-      const flipTop = card.querySelector('.card-flip.top');
-      const flipBottom = card.querySelector('.card-flip.bottom');
-      const currentVal = top.textContent;
+      const number = card.querySelector('.flip-number');
+      const currentVal = number.textContent;
 
       if (currentVal === newVal) return;
 
-      // Set up the faces for the flip
-      flipTop.textContent = currentVal;
-      flipBottom.textContent = newVal;
-
-      // Start flipping
+      // Animate
       card.classList.add('flipping');
+      // Change number at the midpoint of the animation
+      setTimeout(() => {
+        number.textContent = newVal;
+      }, 300); // 0.6s animation, so halfway is 0.3s
 
-      // After top flip animation
-      flipTop.addEventListener('animationend', function handler() {
-        top.textContent = newVal;
-        flipTop.removeEventListener('animationend', handler);
-      });
-
-      // After bottom flip animation
-      flipBottom.addEventListener('animationend', function handler() {
-        bottom.textContent = newVal;
+      number.addEventListener('animationend', function handler() {
         card.classList.remove('flipping');
-        flipBottom.removeEventListener('animationend', handler);
+        number.removeEventListener('animationend', handler);
       });
     }
 
